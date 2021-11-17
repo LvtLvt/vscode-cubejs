@@ -1,5 +1,9 @@
-import {AstNode, BinaryExpressionNode, ExpressionStatementNode, NodeTypes, Parser} from "./Parser";
+import {AstNode, ExpressionNode, ExpressionStatementNode, NodeTypes, Parser} from "./Parser";
 import {Token, Tokenizer, TokenTypes} from "./Tokenizer";
+
+function prettyLog(obj: {}) {
+  console.log(JSON.stringify(obj, null, 2));
+}
 
 describe('parser', () => {
 
@@ -8,7 +12,7 @@ describe('parser', () => {
     const ast = parser.parse(`
         y = (2+3) * 3;
     `);
-    console.log(JSON.stringify(ast, null, 2));
+    prettyLog(ast);
   })
 
   it('simple curlyBracket', () => {
@@ -23,22 +27,21 @@ describe('parser', () => {
           body: [new AstNode({type: NodeTypes.StringLiteral, value: "   abc"})]
         })
       ],
-    }))
+    }));
   });
 
   it('simple binary expression', () => {
     const parser = new Parser();
     const ast = parser.parse('{(1+2)+3;}');
 
-    console.log(JSON.stringify(ast, null, 2));
     expect(ast).toStrictEqual(new AstNode({
       type: NodeTypes.Program,
       body: [
         new AstNode({
           type: NodeTypes.BlockStatement,
           body: [
-              new BinaryExpressionNode( new Token(TokenTypes.AdditiveOperator, '+'),
-                new BinaryExpressionNode(
+              new ExpressionNode( new Token(TokenTypes.AdditiveOperator, '+'),
+                new ExpressionNode(
                   new Token(TokenTypes.AdditiveOperator, '+'),
                   new AstNode({type: NodeTypes.NumericLiteral, value: 1}),
                   new AstNode({type: NodeTypes.NumericLiteral, value: 2}),
@@ -60,11 +63,3 @@ describe('tokenizer', () => {
     expect(nextToken).not.toBeNull();
   });
 });
-
-// new AstNode({type: NodeTypes.EmptyExpression, value: ""}),
-//   new ExpressionStatementNode(new AstNode({type: NodeTypes.NumericLiteral, value: '123'})),
-//   new ExpressionStatementNode(
-//     new BinaryExpressionNode(
-//       new Token(TokenTypes.AdditiveOperator, '+'),
-//       new AstNode({type: NodeTypes.NumericLiteral, value: })
-// ],

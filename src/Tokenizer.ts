@@ -3,6 +3,9 @@ export enum TokenTypes {
   String = 'String',
   Identifier = 'Identifier',
 
+  SimpleAssignmentOperator = 'SimpleAssignmentOperator',
+  ComplexAssignmentOperator = 'ComplexAssignmentOperator',
+
   Semicolon = ';',
   CurlyBracketOpen = '{',
   CurlyBracketClose = '}',
@@ -29,9 +32,11 @@ const Spec: Array<[RegExp, TokenTypes]> = [
 
   [/^;/, TokenTypes.Semicolon],
 
-  [/^\w+/, TokenTypes.Identifier],
+  [/^=/, TokenTypes.SimpleAssignmentOperator],
+  [/^[\*\+\-]=/, TokenTypes.ComplexAssignmentOperator],
 
   [/^\d+/, TokenTypes.Number],
+  [/^\w+/, TokenTypes.Identifier],
 
   [/^"[^"]*"/, TokenTypes.String],
   [/^'[^']*'/, TokenTypes.String],
