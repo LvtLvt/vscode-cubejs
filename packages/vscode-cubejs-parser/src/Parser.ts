@@ -8,6 +8,8 @@ export enum NodeTypes {
   NumericLiteral = 'NumericLiteral',
   StringLiteral = 'StringLiteral',
   ExpressionStatement = 'ExpressionStatement',
+  ObjectExpression = 'ObjectExpression',
+  ObjectPropertyDeclaration = 'ObjectPropertyDeclaration',
   BlockStatement = 'BlockStatement',
   EmptyExpression = "EmptyExpression",
   Expression = "Expression",
@@ -18,7 +20,7 @@ export enum NodeTypes {
 
 export class AstNode {
   public readonly type: NodeTypes;
-  public readonly body?: AstNode[];
+  public body?: AstNode[];
   public readonly value?: any;
 
   constructor(options: {
@@ -137,11 +139,11 @@ export class Parser {
     })
   }
 
-  private VariableExpression(): AstNode {
+  private VariableExpression(assignmentOperator = TokenTypes.SimpleAssignmentOperator): AstNode {
     const identifier = this._eat(TokenTypes.Identifier);
 
-    if (this._lookahead?.type === TokenTypes.SimpleAssignmentOperator) {
-      this._eat(TokenTypes.SimpleAssignmentOperator);
+    if (this._lookahead?.type === assignmentOperator) {
+      this._eat(assignmentOperator);
       return new VariableNode(identifier.value, this.Expression());
     }
 
@@ -189,6 +191,7 @@ export class Parser {
   private PrimaryExpression(): AstNode {
     switch (this._lookahead?.type) {
       case TokenTypes.RoundBracketOpen: return this.ParenthesizedExpression();
+      case TokenTypes.CurlyBracketOpen: return this.ObjectExpression();
       case TokenTypes.Identifier: return this.Identifier();
       default: return this.Literal();
     }
@@ -200,6 +203,40 @@ export class Parser {
     this._eat(TokenTypes.RoundBracketClose);
     return expression;
   }
+
+  private ObjectExpression(): AstNode {
+    const object = new AstNode({type: NodeTypes.ObjectExpression});
+    object.body = [];
+    this._eat(TokenTypes.CurlyBracketOpen);
+    do {
+      const identifier = this.ObjectPropertyIdentifier();
+      this._eat(TokenTypes.Colon);
+      const property = new VariableNode(identifier.value, this.AdditiveExpression());
+      if (this._lookahead?.type === TokenTypes.Comma) {
+        this._eat(TokenTypes.Comma);
+      }
+      object.body.push(property);
+    }
+    while(this._lookahead?.type !== TokenTypes.CurlyBracketClose);
+    this._eat(TokenTypes.CurlyBracketClose);
+
+    return object;
+  }
+
+  private ObjectPropertyIdentifier(): AstNode {
+    let identifier;
+
+    if (this._lookahead?.type === TokenTypes.SquareBracketOpen) {
+      this._eat(TokenTypes.SquareBracketOpen);
+      identifier = this.Identifier();
+      this._eat(TokenTypes.SquareBracketClose);
+    } else {
+      identifier = this.Identifier();
+    }
+
+    return identifier;
+  }
+
 
   private NumericLiteral(): AstNode {
     const token = this._eat(TokenTypes.Number);

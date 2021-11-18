@@ -7,9 +7,11 @@ export enum TokenTypes {
   ConstKeyword = 'ConstKeyword',
   VarKeyword = 'VarKeyword',
 
+
   SimpleAssignmentOperator = 'SimpleAssignmentOperator',
   ComplexAssignmentOperator = 'ComplexAssignmentOperator',
 
+  Colon = ':',
   Semicolon = ';',
   CurlyBracketOpen = '{',
   CurlyBracketClose = '}',
@@ -17,9 +19,13 @@ export enum TokenTypes {
   RoundBracketOpen = '(',
   RoundBracketClose = ')',
 
+  SquareBracketOpen = '[',
+  SquareBracketClose = ']',
+
   Whitespace = 'Whitespace',
   AdditiveOperator = 'AdditiveOperator',
   Comma = 'Comma',
+  Dot = '.',
 }
 
 const Spec: Array<[RegExp, TokenTypes]> = [
@@ -27,7 +33,6 @@ const Spec: Array<[RegExp, TokenTypes]> = [
   [/^\/\/.*/, TokenTypes.Whitespace],
   [/^\/\*[\s\S]*?\*\//, TokenTypes.Whitespace],
 
-  [/^[\+\-\*]/, TokenTypes.AdditiveOperator],
 
   [/^{/, TokenTypes.CurlyBracketOpen],
   [/^}/, TokenTypes.CurlyBracketClose],
@@ -35,12 +40,17 @@ const Spec: Array<[RegExp, TokenTypes]> = [
   [/^\(/, TokenTypes.RoundBracketOpen],
   [/^\)/, TokenTypes.RoundBracketClose],
 
-  [/^;/, TokenTypes.Semicolon],
-  [/^,/, TokenTypes.Comma],
+  [/^\[/, TokenTypes.SquareBracketOpen],
+  [/^\]/, TokenTypes.SquareBracketClose],
 
   [/^=/, TokenTypes.SimpleAssignmentOperator],
-  [/^[\*\+\-]=/, TokenTypes.ComplexAssignmentOperator],
+  [/^[\*\+\-\/\%]=/, TokenTypes.ComplexAssignmentOperator],
+  [/^[\+\-\*\/\%]/, TokenTypes.AdditiveOperator],
 
+  [/^\./, TokenTypes.Dot],
+  [/^\:/, TokenTypes.Colon],
+  [/^;/, TokenTypes.Semicolon],
+  [/^,/, TokenTypes.Comma],
 
   [/^let/, TokenTypes.LetKeyword],
   [/^const/, TokenTypes.ConstKeyword],
