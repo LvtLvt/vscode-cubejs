@@ -3,6 +3,10 @@ export enum TokenTypes {
   String = 'String',
   Identifier = 'Identifier',
 
+  LetKeyword = 'LetKeyword',
+  ConstKeyword = 'ConstKeyword',
+  VarKeyword = 'VarKeyword',
+
   SimpleAssignmentOperator = 'SimpleAssignmentOperator',
   ComplexAssignmentOperator = 'ComplexAssignmentOperator',
 
@@ -15,6 +19,7 @@ export enum TokenTypes {
 
   Whitespace = 'Whitespace',
   AdditiveOperator = 'AdditiveOperator',
+  Comma = 'Comma',
 }
 
 const Spec: Array<[RegExp, TokenTypes]> = [
@@ -31,9 +36,15 @@ const Spec: Array<[RegExp, TokenTypes]> = [
   [/^\)/, TokenTypes.RoundBracketClose],
 
   [/^;/, TokenTypes.Semicolon],
+  [/^,/, TokenTypes.Comma],
 
   [/^=/, TokenTypes.SimpleAssignmentOperator],
   [/^[\*\+\-]=/, TokenTypes.ComplexAssignmentOperator],
+
+
+  [/^let/, TokenTypes.LetKeyword],
+  [/^const/, TokenTypes.ConstKeyword],
+  [/^var/, TokenTypes.VarKeyword],
 
   [/^\d+/, TokenTypes.Number],
   [/^\w+/, TokenTypes.Identifier],
@@ -46,7 +57,8 @@ export class Token {
   constructor(
     public readonly type: TokenTypes,
     public readonly value: string
-  ) { }
+  ) {
+  }
 }
 
 export class Tokenizer {

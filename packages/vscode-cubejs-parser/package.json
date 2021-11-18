@@ -14,7 +14,8 @@
   "typings": "./lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "tslint -c tslint.json src/**/*.ts"
+    "lint": "tslint -c tslint.json src/**/*.ts",
+    "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",

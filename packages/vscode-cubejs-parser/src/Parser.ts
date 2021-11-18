@@ -12,6 +12,8 @@ export enum NodeTypes {
   EmptyExpression = "EmptyExpression",
   Expression = "Expression",
   Identifier = "Identifier",
+  VariableStatement = 'VariableStatement',
+  VariableDeclaration = 'VariableDeclaration',
 }
 
 export class AstNode {
@@ -30,15 +32,15 @@ export class AstNode {
   }
 }
 
-export class ExpressionStatementNode extends AstNode {
-  constructor(public expression: AstNode) {
-    super({type: NodeTypes.ExpressionStatement});
-  }
-}
-
 export class ExpressionNode extends AstNode {
   constructor(public readonly operator: Token, public left: AstNode, public right: AstNode) {
     super({type: NodeTypes.Expression});
+  }
+}
+
+export class VariableNode extends AstNode {
+  constructor(public readonly name: string, public init?: AstNode) {
+    super({type: NodeTypes.VariableDeclaration});
   }
 }
 
@@ -94,6 +96,9 @@ export class Parser {
     switch (this._lookahead?.type) {
       case TokenTypes.Semicolon: return this.EmptyStatement();
       case TokenTypes.CurlyBracketOpen: return this.BlockStatement();
+      case TokenTypes.LetKeyword:
+      case TokenTypes.VarKeyword:
+      case TokenTypes.ConstKeyword: return this.VariableStatement();
       default: return this.ExpressionStatement();
     }
   }
@@ -112,7 +117,39 @@ export class Parser {
     return new AstNode({
       type: NodeTypes.BlockStatement,
       body,
+    });
+  }
+
+  private VariableStatement(): AstNode {
+    let keyword = this._eat(this._lookahead?.type!!);
+
+    const variables: AstNode[] = [];
+    do {
+      variables.push(this.VariableExpression());
+    } while (this._lookahead?.type === TokenTypes.Comma && this._eat(TokenTypes.Comma))
+
+    return new AstNode({
+      type: NodeTypes.VariableStatement,
+      value: keyword,
+      body: variables,
     })
+  }
+
+  /*
+      VariableExpression:   Identifier SimpleAssignOperator Expression
+                          | Identifier SimpleAssignmentOperator VariableExpression
+                          | Identifier Comma VariableExpression
+                          | Identifier Comma VariableExpression
+   */
+  private VariableExpression(): AstNode {
+    const identifier = this._eat(TokenTypes.Identifier);
+
+    if (this._lookahead?.type === TokenTypes.SimpleAssignmentOperator) {
+      this._eat(TokenTypes.SimpleAssignmentOperator);
+      return new VariableNode(identifier.value, this.ExpressionStatement());
+    }
+
+    return new VariableNode(identifier.value);
   }
 
   private ExpressionStatement(): AstNode {
