@@ -50,8 +50,6 @@ describe('variable', () => {
       let a, b = 3 + 3;
     `);
 
-    prettyLog(ast);
-
     expect(toPlainObject(ast)).toMatchObject({
       type: NodeTypes.Program,
       body: [
@@ -97,30 +95,43 @@ describe('variable', () => {
       type: NodeTypes.Program,
       body: [
         {
-          type: NodeTypes.VariableStatement,
-          value: new Token(TokenTypes.LetKeyword, 'let'),
-          body: [
+          "type": "VariableStatement",
+          "value": {
+            "type": "LetKeyword",
+            "value": "let"
+          },
+          "body": [
             {
-              type: NodeTypes.VariableDeclaration,
-              name: 'a',
-            },
-            {
-              type: NodeTypes.VariableDeclaration,
-              name: 'b',
-              init: {
-                type: NodeTypes.Expression,
-                operator: new Token(TokenTypes.AdditiveOperator, '+'),
-                left: {
-                  type: NodeTypes.NumericLiteral,
-                  value: 3,
+              "type": "VariableDeclaration",
+              "name": "a",
+              "init": {
+                "type": "Expression",
+                "operator": {
+                  "type": "SimpleAssignmentOperator",
+                  "value": "="
                 },
-                right: {
-                  type: NodeTypes.NumericLiteral,
-                  value: 3,
+                "left": {
+                  "type": "Identifier",
+                  "value": "b"
                 },
-              },
+                "right": {
+                  "type": "Expression",
+                  "operator": {
+                    "type": "AdditiveOperator",
+                    "value": "+"
+                  },
+                  "left": {
+                    "type": "NumericLiteral",
+                    "value": 3
+                  },
+                  "right": {
+                    "type": "NumericLiteral",
+                    "value": 3
+                  }
+                }
+              }
             }
-          ],
+          ]
         }
       ],
     });

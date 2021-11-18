@@ -128,6 +128,8 @@ export class Parser {
       variables.push(this.VariableExpression());
     } while (this._lookahead?.type === TokenTypes.Comma && this._eat(TokenTypes.Comma))
 
+    this._eat(TokenTypes.Semicolon);
+
     return new AstNode({
       type: NodeTypes.VariableStatement,
       value: keyword,
@@ -135,18 +137,12 @@ export class Parser {
     })
   }
 
-  /*
-      VariableExpression:   Identifier SimpleAssignOperator Expression
-                          | Identifier SimpleAssignmentOperator VariableExpression
-                          | Identifier Comma VariableExpression
-                          | Identifier Comma VariableExpression
-   */
   private VariableExpression(): AstNode {
     const identifier = this._eat(TokenTypes.Identifier);
 
     if (this._lookahead?.type === TokenTypes.SimpleAssignmentOperator) {
       this._eat(TokenTypes.SimpleAssignmentOperator);
-      return new VariableNode(identifier.value, this.ExpressionStatement());
+      return new VariableNode(identifier.value, this.Expression());
     }
 
     return new VariableNode(identifier.value);
