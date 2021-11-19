@@ -11,6 +11,7 @@ export enum NodeTypes {
   ExpressionStatement = 'ExpressionStatement',
   ObjectExpression = 'ObjectExpression',
   ObjectPropertyDeclaration = 'ObjectPropertyDeclaration',
+  ObjectDestructuringPropertyDeclaration = 'ObjectDestructuringPropertyDeclaration',
   BlockStatement = 'BlockStatement',
   ReturnStatement = 'ReturnStatement',
   EmptyExpression = "EmptyExpression",
@@ -71,6 +72,12 @@ export class ObjectPropertyDeclarationNode extends AstNode {
     super({type: NodeTypes.ObjectPropertyDeclaration});
     this.name = options.name;
     this.init = options.init;
+  }
+}
+
+export class ObjectDestructuringPropertyDeclarationNode extends AstNode {
+  constructor(public name: string, public alias?: string) {
+    super({type: NodeTypes.ObjectDestructuringPropertyDeclaration});
   }
 }
 
@@ -285,20 +292,19 @@ export class Parser {
   }
 
   private ParameterDeclaration(): AstNode {
-    if (this._lookahead?.type === TokenTypes.Identifier) {
-      return this.Identifier();
-    } else {
-      return this.ObjectDestructureDeclaration();
+    switch (this._lookahead?.type) {
+      case TokenTypes.Identifier: return this.Identifier();
+      default: return this.ObjectExpression(true);
     }
   }
 
-  private ObjectExpression(isDestructure?: false): AstNode {
+  private ObjectExpression(isDestructuring = false): AstNode {
     const object = new AstNode({type: NodeTypes.ObjectExpression});
     object.body = [];
     this._eat(TokenTypes.CurlyBracketOpen);
 
     while (this._lookahead?.type !== TokenTypes.CurlyBracketClose) {
-      object.body.push(isDestructure ? this.ObjectDestructureDeclaration() : this.ObjectPropertyDeclaration());
+      object.body.push(isDestructuring ? this.ObjectDestructuringPropertyDeclaration() : this.ObjectPropertyDeclaration());
     }
 
     this._eat(TokenTypes.CurlyBracketClose);
@@ -306,18 +312,20 @@ export class Parser {
     return object;
   }
 
-  private ObjectDestructureDeclaration(): AstNode {
-    let property;
-
+  private ObjectDestructuringPropertyDeclaration(): AstNode {
     const identifier = this.Identifier();
-    if (this._lookahead?.type === TokenTypes.Colon) {
-      // alias
-    } else {
-      // TODO:
+    let alias;
 
+    if (this._lookahead?.type === TokenTypes.Colon) {
+      this._eat(TokenTypes.Colon);
+      alias = this.Identifier().value;
     }
 
-    return new AstNode({type: NodeTypes.ObjectExpression});
+    if (this._lookahead?.type === TokenTypes.Comma) {
+      this._eat(TokenTypes.Comma);
+    }
+
+    return new ObjectDestructuringPropertyDeclarationNode(identifier.value, alias);
   }
 
   private ObjectPropertyDeclaration(): AstNode {
