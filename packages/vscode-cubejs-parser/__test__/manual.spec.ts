@@ -6,7 +6,7 @@ describe('manual', () => {
   it('for manual test', () => {
     const ast = parser.parse(`
       function abc() {
-        return a + b;
+        return a + b; 
       }
     `);
 
