@@ -5,10 +5,9 @@ describe('manual', () => {
   const parser = new Parser();
   it('for manual test', () => {
     const ast = parser.parse(`
-      const a = {
-        a: 123,
-        b: 456,
-      };
+      function abc() {
+        return a + b;
+      }
     `);
 
     prettyLog(ast);

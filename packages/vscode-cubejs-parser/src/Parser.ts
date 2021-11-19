@@ -12,6 +12,7 @@ export enum NodeTypes {
   ObjectExpression = 'ObjectExpression',
   ObjectPropertyDeclaration = 'ObjectPropertyDeclaration',
   BlockStatement = 'BlockStatement',
+  ReturnStatement = 'ReturnStatement',
   EmptyExpression = "EmptyExpression",
   Expression = "Expression",
   UnaryExpression = 'UnaryExpression',
@@ -140,6 +141,8 @@ export class Parser {
       case TokenTypes.LetKeyword:
       case TokenTypes.VarKeyword:
       case TokenTypes.ConstKeyword: return this.VariableStatement();
+      case TokenTypes.ReturnKeyword: return this.ReturnStatement();
+      case TokenTypes.Function: return this.FunctionStatement();
       default: return this.ExpressionStatement();
     }
   }
@@ -159,6 +162,14 @@ export class Parser {
       type: NodeTypes.BlockStatement,
       body,
     });
+  }
+
+  private ReturnStatement() {
+    this._eat(TokenTypes.ReturnKeyword);
+    return new AstNode({
+      type: NodeTypes.ReturnStatement,
+      value: this.AdditiveExpression(),
+    })
   }
 
   private VariableStatement(): AstNode {
@@ -249,16 +260,36 @@ export class Parser {
     return expression;
   }
 
-  private FunctionDeclaration(): AstNode {
+  private FunctionStatement(): AstNode {
     this._eat(TokenTypes.Function);
-    let identifier;
-    if (this._lookahead?.type === TokenTypes.RoundBracketOpen) {
+    let identifier = this.Identifier();
+    this._eat(TokenTypes.RoundBracketOpen);
+    let params = this.FunctionParameterList();
+    this._eat(TokenTypes.RoundBracketClose);
+    const body = this.StatementList();
 
+    return new FunctionDeclarationNode({name: identifier.value, body, params});
+  }
+
+  private FunctionParameterList(): AstNode[] {
+    let params: AstNode[] = [];
+    while(this._lookahead?.type !== TokenTypes.RoundBracketClose) {
+      const parameter = this.ParameterDeclaration();
+      if (this._lookahead?.type === TokenTypes.Comma) {
+        this._eat(TokenTypes.Comma);
+      }
+      params.push(parameter);
     }
 
-    return new AstNode({
+    return params;
+  }
 
-    });
+  private ParameterDeclaration(): AstNode {
+    if (this._lookahead?.type === TokenTypes.Identifier) {
+      return this.Identifier();
+    } else {
+      return this.ObjectDestructureDeclaration();
+    }
   }
 
   private ObjectExpression(isDestructure?: false): AstNode {
@@ -282,10 +313,11 @@ export class Parser {
     if (this._lookahead?.type === TokenTypes.Colon) {
       // alias
     } else {
+      // TODO:
 
     }
 
-    return property;
+    return new AstNode({type: NodeTypes.ObjectExpression});
   }
 
   private ObjectPropertyDeclaration(): AstNode {
