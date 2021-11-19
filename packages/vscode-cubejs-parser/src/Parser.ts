@@ -1,6 +1,7 @@
 import {Token, Tokenizer, TokenTypes} from './Tokenizer';
 import * as assert from "assert";
 import {SyntaxError} from './SyntaxError';
+import {toPlainObject} from "../__test__/utils";
 
 
 export enum NodeTypes {
@@ -17,6 +18,7 @@ export enum NodeTypes {
   Identifier = "Identifier",
   VariableStatement = 'VariableStatement',
   VariableDeclaration = 'VariableDeclaration',
+  FunctionDeclaration = 'FunctionDeclaration',
 }
 
 export class AstNode {
@@ -32,6 +34,10 @@ export class AstNode {
     this.type = options.type;
     this.value = options.value;
     this.body = options.body;
+  }
+
+  toPlainObject() {
+    return toPlainObject(this);
   }
 }
 
@@ -64,6 +70,18 @@ export class ObjectPropertyDeclarationNode extends AstNode {
     super({type: NodeTypes.ObjectPropertyDeclaration});
     this.name = options.name;
     this.init = options.init;
+  }
+}
+
+export class FunctionDeclarationNode extends AstNode {
+  public name: string;
+  public params?: AstNode[];
+
+  constructor(options: {name: string, body: AstNode[], params?: AstNode[]}) {
+    super({type: NodeTypes.FunctionDeclaration});
+    this.name = options.name;
+    this.body = options.body;
+    this.params = options.params;
   }
 }
 
@@ -231,42 +249,69 @@ export class Parser {
     return expression;
   }
 
-  private ObjectExpression(): AstNode {
+  private FunctionDeclaration(): AstNode {
+    this._eat(TokenTypes.Function);
+    let identifier;
+    if (this._lookahead?.type === TokenTypes.RoundBracketOpen) {
+
+    }
+
+    return new AstNode({
+
+    });
+  }
+
+  private ObjectExpression(isDestructure?: false): AstNode {
     const object = new AstNode({type: NodeTypes.ObjectExpression});
     object.body = [];
     this._eat(TokenTypes.CurlyBracketOpen);
 
     while (this._lookahead?.type !== TokenTypes.CurlyBracketClose) {
-
-      let property;
-
-      switch (this._lookahead?.type) {
-        case TokenTypes.Spread: {
-          property = new ObjectPropertyDeclarationNode({init: this.PrimaryExpression()});
-          break;
-        }
-        default: {
-          const identifier = this.ObjectPropertyIdentifier();
-          if (this._lookahead?.type === TokenTypes.Colon) {
-            this._eat(TokenTypes.Colon);
-            property = new ObjectPropertyDeclarationNode({name: identifier.value, init: this.AdditiveExpression()});
-          } else {
-            property = new ObjectPropertyDeclarationNode({name: identifier.value});
-          }
-          break;
-        }
-      }
-
-      if (this._lookahead?.type === TokenTypes.Comma) {
-        this._eat(TokenTypes.Comma);
-      }
-
-      object.body.push(property);
+      object.body.push(isDestructure ? this.ObjectDestructureDeclaration() : this.ObjectPropertyDeclaration());
     }
 
     this._eat(TokenTypes.CurlyBracketClose);
 
     return object;
+  }
+
+  private ObjectDestructureDeclaration(): AstNode {
+    let property;
+
+    const identifier = this.Identifier();
+    if (this._lookahead?.type === TokenTypes.Colon) {
+      // alias
+    } else {
+
+    }
+
+    return property;
+  }
+
+  private ObjectPropertyDeclaration(): AstNode {
+    let property;
+
+    switch (this._lookahead?.type) {
+      case TokenTypes.Spread: {
+        property = new ObjectPropertyDeclarationNode({init: this.PrimaryExpression()});
+        break;
+      }
+      default: {
+        const identifier = this.ObjectPropertyIdentifier();
+        if (this._lookahead?.type === TokenTypes.Colon) {
+          this._eat(TokenTypes.Colon);
+          property = new ObjectPropertyDeclarationNode({name: identifier.value, init: this.AdditiveExpression()});
+        } else {
+          property = new ObjectPropertyDeclarationNode({name: identifier.value});
+        }
+      }
+    }
+
+    if (this._lookahead?.type === TokenTypes.Comma) {
+      this._eat(TokenTypes.Comma);
+    }
+
+    return property;
   }
 
   private ObjectPropertyIdentifier(): AstNode {
