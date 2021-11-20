@@ -149,7 +149,7 @@ export class Parser {
       case TokenTypes.VarKeyword:
       case TokenTypes.ConstKeyword: return this.VariableStatement();
       case TokenTypes.ReturnKeyword: return this.ReturnStatement();
-      case TokenTypes.Function: return this.FunctionStatement();
+      case TokenTypes.FunctionKeyword: return this.FunctionStatement();
       default: return this.ExpressionStatement();
     }
   }
@@ -196,6 +196,16 @@ export class Parser {
     })
   }
 
+  private ExpressionStatement(): AstNode {
+    const expression = this.Expression();
+    this._eat(TokenTypes.Semicolon);
+    return expression;
+  }
+
+  private Expression(): AstNode {
+    return this.AssignmentExpression();
+  }
+
   private VariableExpression(assignmentOperator = TokenTypes.SimpleAssignmentOperator): AstNode {
     const identifier = this._eat(TokenTypes.Identifier);
 
@@ -205,16 +215,6 @@ export class Parser {
     }
 
     return new VariableNode(identifier.value);
-  }
-
-  private ExpressionStatement(): AstNode {
-    const expression = this.Expression();
-    this._eat(TokenTypes.Semicolon);
-    return expression;
-  }
-
-  private Expression(): AstNode {
-    return this.AssignmentExpression();
   }
 
   private AssignmentExpression(): AstNode {
@@ -268,7 +268,7 @@ export class Parser {
   }
 
   private FunctionStatement(): AstNode {
-    this._eat(TokenTypes.Function);
+    this._eat(TokenTypes.FunctionKeyword);
     let identifier = this.Identifier();
     this._eat(TokenTypes.RoundBracketOpen);
     let params = this.FunctionParameterList();

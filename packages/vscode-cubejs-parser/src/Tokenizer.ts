@@ -2,7 +2,7 @@ export enum TokenTypes {
   Number = 'Number',
   String = 'String',
   Identifier = 'Identifier',
-  Function = 'Function',
+  FunctionKeyword = 'FunctionKeyword',
 
   LetKeyword = 'LetKeyword',
   ConstKeyword = 'ConstKeyword',
@@ -35,7 +35,7 @@ const Spec: Array<[RegExp, TokenTypes]> = [
   [/^\/\/.*/, TokenTypes.Whitespace],
   [/^\/\*[\s\S]*?\*\//, TokenTypes.Whitespace],
 
-  [/^function/, TokenTypes.Function],
+  [/^function/, TokenTypes.FunctionKeyword],
   [/^return/, TokenTypes.ReturnKeyword],
 
   [/^{/, TokenTypes.CurlyBracketOpen],
