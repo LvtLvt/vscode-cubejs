@@ -291,7 +291,7 @@ export class Parser {
     return new FunctionDeclarationNode({name: identifier.value, body, params});
   }
 
-  private FunctionParameterList(declarationFn = this.ParameterDeclaration): AstNode[] {
+  private FunctionParameterList(declarationFn = this.ParameterDeclaration.bind(this)): AstNode[] {
     let params: AstNode[] = [];
     while(this._lookahead?.type !== TokenTypes.RoundBracketClose) {
       const parameter = declarationFn();
@@ -406,8 +406,6 @@ export class Parser {
 
     return identifier;
   }
-
-
 
   private Identifier() {
     const token = this._eat(TokenTypes.Identifier);
