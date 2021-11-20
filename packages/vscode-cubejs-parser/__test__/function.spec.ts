@@ -77,6 +77,57 @@ describe('function', () => {
       `
     );
 
-    prettyLog(ast.toPlainObject());
+    expect(ast.toPlainObject()).toMatchObject({
+      "type": "Program",
+      "body": [
+        {
+          "type": "FunctionCallExpression",
+          "name": "a",
+          "params": [
+            {
+              "type": "NumericLiteral",
+              "value": 123
+            },
+            {
+              "type": "Identifier",
+              "value": "a"
+            },
+            {
+              "type": "Expression",
+              "operator": {
+                "type": "AdditiveOperator",
+                "value": "+"
+              },
+              "left": {
+                "type": "Identifier",
+                "value": "a"
+              },
+              "right": {
+                "type": "Identifier",
+                "value": "b"
+              }
+            },
+            {
+              "type": "ObjectDeclaration",
+              "body": [
+                {
+                  "type": "ObjectPropertyDeclaration",
+                  "name": "a",
+                  "init": {
+                    "type": "NumericLiteral",
+                    "value": 3
+                  }
+                }
+              ]
+            },
+            {
+              "type": "FunctionCallExpression",
+              "name": "b",
+              "params": []
+            }
+          ]
+        }
+      ]
+    });
   });
 });
