@@ -9,7 +9,7 @@ export enum NodeTypes {
   NumericLiteral = 'NumericLiteral',
   StringLiteral = 'StringLiteral',
   ExpressionStatement = 'ExpressionStatement',
-  ObjectExpression = 'ObjectExpression',
+  ObjectDeclaration = 'ObjectDeclaration',
   ObjectPropertyDeclaration = 'ObjectPropertyDeclaration',
   ObjectDestructuringPropertyDeclaration = 'ObjectDestructuringPropertyDeclaration',
   BlockStatement = 'BlockStatement',
@@ -21,6 +21,7 @@ export enum NodeTypes {
   VariableStatement = 'VariableStatement',
   VariableDeclaration = 'VariableDeclaration',
   FunctionDeclaration = 'FunctionDeclaration',
+  FunctionCallExpression = 'FunctionCallExpression',
 }
 
 export class AstNode {
@@ -90,6 +91,12 @@ export class FunctionDeclarationNode extends AstNode {
     this.name = options.name;
     this.body = options.body;
     this.params = options.params;
+  }
+}
+
+export class FunctionCallExpresssionNode extends AstNode {
+  constructor(public name: string, public params?: AstNode[]) {
+    super({type: NodeTypes.FunctionCallExpression});
   }
 }
 
@@ -248,8 +255,8 @@ export class Parser {
   private PrimaryExpression(): AstNode {
     switch (this._lookahead?.type) {
       case TokenTypes.RoundBracketOpen: return this.ParenthesizedExpression();
-      case TokenTypes.CurlyBracketOpen: return this.ObjectExpression();
-      case TokenTypes.Identifier: return this.Identifier();
+      case TokenTypes.CurlyBracketOpen: return this.ObjectDeclaration();
+      case TokenTypes.Identifier: return this.CallableIdentifier();
       case TokenTypes.Spread: return this.SpreadExpression();
       default: return this.Literal();
     }
@@ -273,15 +280,21 @@ export class Parser {
     this._eat(TokenTypes.RoundBracketOpen);
     let params = this.FunctionParameterList();
     this._eat(TokenTypes.RoundBracketClose);
+
+    if (this._lookahead?.type !== TokenTypes.CurlyBracketOpen) {
+      // body is required
+      throw new SyntaxError(`FunctionStatement unexpected "${this._lookahead?.value}" but "{" was expected`);
+    }
+
     const body = this.StatementList();
 
     return new FunctionDeclarationNode({name: identifier.value, body, params});
   }
 
-  private FunctionParameterList(): AstNode[] {
+  private FunctionParameterList(declarationFn = this.ParameterDeclaration): AstNode[] {
     let params: AstNode[] = [];
     while(this._lookahead?.type !== TokenTypes.RoundBracketClose) {
-      const parameter = this.ParameterDeclaration();
+      const parameter = declarationFn();
       if (this._lookahead?.type === TokenTypes.Comma) {
         this._eat(TokenTypes.Comma);
       }
@@ -294,12 +307,16 @@ export class Parser {
   private ParameterDeclaration(): AstNode {
     switch (this._lookahead?.type) {
       case TokenTypes.Identifier: return this.Identifier();
-      default: return this.ObjectExpression(true);
+      default: return this.ObjectDeclaration(true);
     }
   }
 
-  private ObjectExpression(isDestructuring = false): AstNode {
-    const object = new AstNode({type: NodeTypes.ObjectExpression});
+  private ParameterDeclarationForCall(): AstNode {
+    return this.AdditiveExpression();
+  }
+
+  private ObjectDeclaration(isDestructuring = false): AstNode {
+    const object = new AstNode({type: NodeTypes.ObjectDeclaration});
     object.body = [];
     this._eat(TokenTypes.CurlyBracketOpen);
 
@@ -376,6 +393,21 @@ export class Parser {
       value: Number(token.value),
     });
   }
+
+  private CallableIdentifier(): AstNode {
+    const identifier = this.Identifier();
+
+    if (this._lookahead?.type === TokenTypes.RoundBracketOpen) {
+      this._eat(TokenTypes.RoundBracketOpen);
+      const params = this.FunctionParameterList(this.ParameterDeclarationForCall.bind(this));
+      this._eat(TokenTypes.RoundBracketClose);
+      return new FunctionCallExpresssionNode(identifier.value, params);
+    }
+
+    return identifier;
+  }
+
+
 
   private Identifier() {
     const token = this._eat(TokenTypes.Identifier);

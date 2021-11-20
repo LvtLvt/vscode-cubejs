@@ -25,10 +25,10 @@ describe('object expression', () => {
               "type": "VariableDeclaration",
               "name": "a",
               "init": {
-                "type": "ObjectExpression",
+                "type": "ObjectDeclaration",
                 "body": [
                   {
-                    "type": "VariableDeclaration",
+                    "type": "ObjectPropertyDeclaration",
                     "name": "a",
                     "init": {
                       "type": "NumericLiteral",
@@ -36,7 +36,7 @@ describe('object expression', () => {
                     }
                   },
                   {
-                    "type": "VariableDeclaration",
+                    "type": "ObjectPropertyDeclaration",
                     "name": "b",
                     "init": {
                       "type": "NumericLiteral",
@@ -76,14 +76,14 @@ describe('object expression', () => {
               "type": "VariableDeclaration",
               "name": "a",
               "init": {
-                "type": "ObjectExpression",
+                "type": "ObjectDeclaration",
                 "body": [
                   {
-                    "type": "VariableDeclaration",
+                    "type": "ObjectPropertyDeclaration",
                     "name": "a"
                   },
                   {
-                    "type": "VariableDeclaration",
+                    "type": "ObjectPropertyDeclaration",
                     "name": "b",
                     "init": {
                       "type": "NumericLiteral",
@@ -122,7 +122,7 @@ describe('object expression', () => {
               "type": "VariableDeclaration",
               "name": "a",
               "init": {
-                "type": "ObjectExpression",
+                "type": "ObjectDeclaration",
                 "body": [
                   {
                     "type": "ObjectPropertyDeclaration",

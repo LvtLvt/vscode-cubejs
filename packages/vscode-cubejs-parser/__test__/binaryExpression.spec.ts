@@ -23,6 +23,6 @@ describe('binary expression', () => {
           ]
         })
       ],
-    }))
+    }));
   });
 });

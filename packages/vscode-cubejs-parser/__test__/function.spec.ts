@@ -47,7 +47,7 @@ describe('function', () => {
           "name": "abc",
           "params": [
             {
-              "type": "ObjectExpression",
+              "type": "ObjectDeclaration",
               "body": [
                 {
                   "type": "ObjectDestructuringPropertyDeclaration",
@@ -68,5 +68,15 @@ describe('function', () => {
         }
       ]
     });
+  });
+
+  it('function call with parameter', () => {
+    const ast = parser.parse(
+      `
+        a(123, a, (a+b), {a: 3}, b());
+      `
+    );
+
+    prettyLog(ast.toPlainObject());
   });
 });
