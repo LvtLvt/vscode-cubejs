@@ -7,7 +7,7 @@ describe('binary expression', () => {
   it('simple binary expression', () => {
     let parser: Parser;
     parser = new Parser();
-    const ast = parser.parse(`{(1+2)+3;
+    const ast = parser.parse(`{(1+2)+3
     }`);
 
     expect(ast.toPlainObject()).toMatchObject({

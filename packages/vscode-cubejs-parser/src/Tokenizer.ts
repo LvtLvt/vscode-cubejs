@@ -35,7 +35,7 @@ export enum TokenTypes {
 }
 
 const Spec: Array<[RegExp, TokenTypes]> = [
-  [/^\n/, TokenTypes.LineBreak],
+  [/^[\n\r]/, TokenTypes.LineBreak],
   [/^\s/, TokenTypes.Whitespace],
   [/^\/\/.*/, TokenTypes.Whitespace],
   [/^\/\*[\s\S]*?\*\//, TokenTypes.Whitespace],
