@@ -1,12 +1,8 @@
-import {Parser} from "../src/Parser";
-import {Token, TokenTypes} from "../src/Tokenizer";
-import {AstNode, ExpressionNode, NodeTypes} from "../src/Node";
-import {prettyLog} from "../src/utils";
+import {Parser} from "../../src/Parser";
 
 describe('binary expression', () => {
   it('simple binary expression', () => {
-    let parser: Parser;
-    parser = new Parser();
+    let parser = new Parser();
     const ast = parser.parse(`{(1+2)+3
     }`);
 

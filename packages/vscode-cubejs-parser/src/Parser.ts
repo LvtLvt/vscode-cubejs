@@ -12,10 +12,12 @@ import {
   UnaryExpressionNode,
   VariableNode
 } from "./Node";
+import {Cube} from "./Cube";
 
 export class Parser {
   private _content = "";
   private _lookahead: Token | null = null;
+  private cubes: Record<string, Cube> = {};
   private readonly _tokenizer = new Tokenizer();
 
   parse(content: string) {
@@ -55,10 +57,10 @@ export class Parser {
     const statementList = [];
 
     do {
-      if (this._lookahead?.type === TokenTypes.LineBreak) {
-        this._eat(TokenTypes.LineBreak);
+      if (this.eatIfLineBreak()) {
         continue;
       }
+
       statementList.push(this.Statement());
     } while (this._lookahead && this._lookahead.type !== skipLookAheadType);
 

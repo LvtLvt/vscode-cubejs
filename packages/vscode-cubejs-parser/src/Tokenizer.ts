@@ -4,6 +4,11 @@ export enum TokenTypes {
   Identifier = 'Identifier',
   FunctionKeyword = 'FunctionKeyword',
 
+  // cubes
+  CubeKeyword = 'CubeKeyword',
+  MeasuresKeyword = 'MeasuresKeyword',
+  DimensionsKeyword = 'DimensionsKeyword',
+
   LetKeyword = 'LetKeyword',
   ConstKeyword = 'ConstKeyword',
   VarKeyword = 'VarKeyword',
@@ -29,9 +34,6 @@ export enum TokenTypes {
   AdditiveOperator = 'AdditiveOperator',
   Comma = 'Comma',
   Dot = '.',
-  CubeKeyword = 'CubeKeyword',
-  MeasuresKeyword = 'MeasuresKeyword',
-  DimensionsKeyword = 'DimensionsKeyword',
 }
 
 const Spec: Array<[RegExp, TokenTypes]> = [

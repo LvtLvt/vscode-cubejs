@@ -1,5 +1,5 @@
-import {Parser} from "../src/Parser";
-import {prettyLog} from "../src/utils";
+import {Parser} from "../../src/Parser";
+import {prettyLog} from "../../src/utils";
 
 describe('manual', () => {
   const parser = new Parser();

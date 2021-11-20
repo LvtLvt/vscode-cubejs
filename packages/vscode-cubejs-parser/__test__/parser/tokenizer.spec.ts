@@ -1,4 +1,4 @@
-import {Tokenizer} from "../src/Tokenizer";
+import {Tokenizer} from "../../src/Tokenizer";
 
 describe('tokenizer', () => {
   it('should return token', () => {

@@ -1,7 +1,7 @@
-import {Parser} from '../src/Parser';
-import {Token, TokenTypes} from "../src/Tokenizer";
-import {prettyLog, toPlainObject} from "../src/utils";
-import {AstNode, NodeTypes} from "../src/Node";
+import {Parser} from '../../src/Parser';
+import {Token, TokenTypes} from "../../src/Tokenizer";
+import {prettyLog, toPlainObject} from "../../src/utils";
+import {AstNode, NodeTypes} from "../../src/Node";
 
 describe('variable', () => {
   const parser = new Parser();
