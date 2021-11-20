@@ -1,5 +1,5 @@
 import {Parser} from "../src/Parser";
-import {prettyLog, toPlainObject} from "./utils";
+import {prettyLog, toPlainObject} from "../src/utils";
 
 describe('object expression', () => {
   const parser = new Parser();

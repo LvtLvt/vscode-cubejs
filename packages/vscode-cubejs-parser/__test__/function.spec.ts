@@ -1,5 +1,5 @@
 import {Parser} from "../src/Parser";
-import {prettyLog} from "./utils";
+import {prettyLog} from "../src/utils";
 
 describe('function', () => {
   const parser = new Parser();
@@ -17,31 +17,26 @@ describe('function', () => {
           "type": "FunctionDeclaration",
           "body": [
             {
-              "type": "BlockStatement",
-              "body": [
-                {
-                  "type": "ReturnStatement",
-                  "value": {
-                    "type": "Expression",
-                    "operator": {
-                      "type": "AdditiveOperator",
-                      "value": "+"
-                    },
-                    "left": {
-                      "type": "Identifier",
-                      "value": "a"
-                    },
-                    "right": {
-                      "type": "Identifier",
-                      "value": "b"
-                    }
-                  }
+              "type": "ReturnStatement",
+              "value": {
+                "type": "Expression",
+                "operator": {
+                  "type": "AdditiveOperator",
+                  "value": "+"
                 },
-                {
-                  "type": "EmptyExpression",
-                  "value": ""
+                "left": {
+                  "type": "Identifier",
+                  "value": "a"
+                },
+                "right": {
+                  "type": "Identifier",
+                  "value": "b"
                 }
-              ]
+              }
+            },
+            {
+              "type": "EmptyExpression",
+              "value": ""
             }
           ],
           "name": "abc",
@@ -68,12 +63,13 @@ describe('function', () => {
         }
       ]
     });
+
   });
 
   it('function call with parameter', () => {
     const ast = parser.parse(
       `
-        a(123, a, (a+b), {a: 3}, b());
+        a(123, a, (a+b), {a: 3}, b())
       `
     );
 
@@ -126,7 +122,7 @@ describe('function', () => {
               "params": []
             }
           ]
-        }
+        },
       ]
     });
   });

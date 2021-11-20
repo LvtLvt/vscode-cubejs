@@ -24,16 +24,27 @@ export enum TokenTypes {
   SquareBracketOpen = '[',
   SquareBracketClose = ']',
 
+  LineBreak = 'LineBreak',
   Whitespace = 'Whitespace',
   AdditiveOperator = 'AdditiveOperator',
   Comma = 'Comma',
   Dot = '.',
+  CubeKeyword = 'CubeKeyword',
+  MeasuresKeyword = 'MeasuresKeyword',
+  DimensionsKeyword = 'DimensionsKeyword',
 }
 
 const Spec: Array<[RegExp, TokenTypes]> = [
+  [/^\n/, TokenTypes.LineBreak],
   [/^\s/, TokenTypes.Whitespace],
   [/^\/\/.*/, TokenTypes.Whitespace],
   [/^\/\*[\s\S]*?\*\//, TokenTypes.Whitespace],
+
+  // cube
+  [/^cube/, TokenTypes.CubeKeyword],
+  [/^measures/, TokenTypes.MeasuresKeyword],
+  [/^dimensions/, TokenTypes.DimensionsKeyword],
+
 
   [/^function/, TokenTypes.FunctionKeyword],
   [/^return/, TokenTypes.ReturnKeyword],

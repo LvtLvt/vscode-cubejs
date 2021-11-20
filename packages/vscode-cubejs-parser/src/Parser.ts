@@ -1,104 +1,17 @@
 import {Token, Tokenizer, TokenTypes} from './Tokenizer';
 import * as assert from "assert";
 import {SyntaxError} from './SyntaxError';
-import {toPlainObject} from "../__test__/utils";
-
-
-export enum NodeTypes {
-  Program = 'Program',
-  NumericLiteral = 'NumericLiteral',
-  StringLiteral = 'StringLiteral',
-  ExpressionStatement = 'ExpressionStatement',
-  ObjectDeclaration = 'ObjectDeclaration',
-  ObjectPropertyDeclaration = 'ObjectPropertyDeclaration',
-  ObjectDestructuringPropertyDeclaration = 'ObjectDestructuringPropertyDeclaration',
-  BlockStatement = 'BlockStatement',
-  ReturnStatement = 'ReturnStatement',
-  EmptyExpression = "EmptyExpression",
-  Expression = "Expression",
-  UnaryExpression = 'UnaryExpression',
-  Identifier = "Identifier",
-  VariableStatement = 'VariableStatement',
-  VariableDeclaration = 'VariableDeclaration',
-  FunctionDeclaration = 'FunctionDeclaration',
-  FunctionCallExpression = 'FunctionCallExpression',
-}
-
-export class AstNode {
-  public readonly type: NodeTypes;
-  public body?: AstNode[];
-  public readonly value?: any;
-
-  constructor(options: {
-    type: NodeTypes;
-    body?: AstNode[];
-    value?: any;
-  }) {
-    this.type = options.type;
-    this.value = options.value;
-    this.body = options.body;
-  }
-
-  toPlainObject() {
-    return toPlainObject(this);
-  }
-}
-
-export class ExpressionNode extends AstNode {
-  constructor(public readonly operator: Token, public left: AstNode, public right: AstNode) {
-    super({type: NodeTypes.Expression});
-  }
-}
-
-export class UnaryExpressionNode extends AstNode {
-  constructor(public readonly operator: Token, public init: AstNode) {
-    super({type: NodeTypes.UnaryExpression});
-  }
-}
-
-export class VariableNode extends AstNode {
-  constructor(public readonly name: string, public init?: AstNode) {
-    super({type: NodeTypes.VariableDeclaration});
-  }
-}
-
-export class ObjectPropertyDeclarationNode extends AstNode {
-  public init?: AstNode;
-  public name?: string;
-
-  constructor(options: {
-    name?: string,
-    init?: AstNode,
-  }) {
-    super({type: NodeTypes.ObjectPropertyDeclaration});
-    this.name = options.name;
-    this.init = options.init;
-  }
-}
-
-export class ObjectDestructuringPropertyDeclarationNode extends AstNode {
-  constructor(public name: string, public alias?: string) {
-    super({type: NodeTypes.ObjectDestructuringPropertyDeclaration});
-  }
-}
-
-export class FunctionDeclarationNode extends AstNode {
-  public name: string;
-  public params?: AstNode[];
-
-  constructor(options: {name: string, body: AstNode[], params?: AstNode[]}) {
-    super({type: NodeTypes.FunctionDeclaration});
-    this.name = options.name;
-    this.body = options.body;
-    this.params = options.params;
-  }
-}
-
-export class FunctionCallExpresssionNode extends AstNode {
-  constructor(public name: string, public params?: AstNode[]) {
-    super({type: NodeTypes.FunctionCallExpression});
-  }
-}
+import {
+  AstNode,
+  ExpressionNode,
+  FunctionCallExpresssionNode,
+  FunctionDeclarationNode,
+  NodeTypes,
+  ObjectDestructuringPropertyDeclarationNode,
+  ObjectPropertyDeclarationNode,
+  UnaryExpressionNode,
+  VariableNode
+} from "./Node";
 
 export class Parser {
   private _content = "";
@@ -139,11 +52,15 @@ export class Parser {
   }
 
   private StatementList(skipLookAheadType: TokenTypes | null = null): AstNode[] {
-    const statementList = [this.Statement()];
+    const statementList = [];
 
-    while (this._lookahead && this._lookahead.type !== skipLookAheadType) {
+    do {
+      if (this._lookahead?.type === TokenTypes.LineBreak) {
+        this._eat(TokenTypes.LineBreak);
+        continue;
+      }
       statementList.push(this.Statement());
-    }
+    } while (this._lookahead && this._lookahead.type !== skipLookAheadType);
 
     return statementList;
   }
@@ -191,10 +108,13 @@ export class Parser {
 
     const variables: AstNode[] = [];
     do {
+      if (this.eatIfLineBreak()) {
+        continue;
+      }
       variables.push(this.VariableExpression());
     } while (this._lookahead?.type === TokenTypes.Comma && this._eat(TokenTypes.Comma))
 
-    this._eat(TokenTypes.Semicolon);
+    this.eatEndOfExpression();
 
     return new AstNode({
       type: NodeTypes.VariableStatement,
@@ -205,7 +125,9 @@ export class Parser {
 
   private ExpressionStatement(): AstNode {
     const expression = this.Expression();
-    this._eat(TokenTypes.Semicolon);
+
+    this.eatEndOfExpression();
+
     return expression;
   }
 
@@ -286,7 +208,7 @@ export class Parser {
       throw new SyntaxError(`FunctionStatement unexpected "${this._lookahead?.value}" but "{" was expected`);
     }
 
-    const body = this.StatementList();
+    const body = this.BlockStatement().body || [];
 
     return new FunctionDeclarationNode({name: identifier.value, body, params});
   }
@@ -321,6 +243,9 @@ export class Parser {
     this._eat(TokenTypes.CurlyBracketOpen);
 
     while (this._lookahead?.type !== TokenTypes.CurlyBracketClose) {
+      if (this.eatIfLineBreak()) {
+        continue;
+      }
       object.body.push(isDestructuring ? this.ObjectDestructuringPropertyDeclaration() : this.ObjectPropertyDeclaration());
     }
 
@@ -385,7 +310,6 @@ export class Parser {
     return identifier;
   }
 
-
   private NumericLiteral(): AstNode {
     const token = this._eat(TokenTypes.Number);
     return new AstNode({
@@ -430,6 +354,16 @@ export class Parser {
 
       default: throw new SyntaxError(`Literal: unexpected literal production tokenType: [${this._lookahead?.type}] tokenValue: [${this._lookahead?.value}]`);
     }
+  }
+
+  private eatIfLineBreak(): Token | void {
+    if (this._lookahead?.type === TokenTypes.LineBreak) {
+      return this._eat(TokenTypes.LineBreak);
+    }
+  }
+
+  private eatEndOfExpression() {
+    this._eat(this._lookahead?.type === TokenTypes.Semicolon ? TokenTypes.Semicolon : TokenTypes.LineBreak);
   }
 
   private isAssignmentOperator(token: Token) {

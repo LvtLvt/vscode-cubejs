@@ -1,6 +1,7 @@
-import {NodeTypes, Parser} from '../src/Parser';
+import {Parser} from '../src/Parser';
 import {Token, TokenTypes} from "../src/Tokenizer";
-import {prettyLog, toPlainObject} from "./utils";
+import {prettyLog, toPlainObject} from "../src/utils";
+import {AstNode, NodeTypes} from "../src/Node";
 
 describe('variable', () => {
   const parser = new Parser();
@@ -12,35 +13,37 @@ describe('variable', () => {
       ${keyword} a = 3 + 3;
     `);
 
-      expect(toPlainObject(ast)).toMatchObject(
-        {
-          type: NodeTypes.Program,
-          body: [
-            {
-              type: NodeTypes.VariableStatement,
-              value: new Token(tokenTypes[i], keyword),
-              body: [
-                {
-                  type: NodeTypes.VariableDeclaration,
-                  name: 'a',
-                  init: {
-                    type: NodeTypes.Expression,
-                    operator: new Token(TokenTypes.AdditiveOperator, '+'),
-                    left: {
-                      type: NodeTypes.NumericLiteral,
-                      value: 3,
-                    },
-                    right: {
-                      type: NodeTypes.NumericLiteral,
-                      value: 3,
-                    },
+      expect(ast.toPlainObject()).toMatchObject({
+        "type": "Program",
+        "body": [
+          {
+            "type": "VariableStatement",
+            "value": new Token(tokenTypes[i], keyword),
+            "body": [
+              {
+                "type": "VariableDeclaration",
+                "name": "a",
+                "init": {
+                  "type": "Expression",
+                  "operator": {
+                    "type": "AdditiveOperator",
+                    "value": "+"
                   },
-                },
-              ],
-            }
-          ],
-        }
-      );
+                  "left": {
+                    "type": "NumericLiteral",
+                    "value": 3
+                  },
+                  "right": {
+                    "type": "NumericLiteral",
+                    "value": 3
+                  }
+                }
+              }
+            ]
+          },
+        ]
+      })
+
     });
   });
 
@@ -50,37 +53,44 @@ describe('variable', () => {
       let a, b = 3 + 3;
     `);
 
-    expect(toPlainObject(ast)).toMatchObject({
-      type: NodeTypes.Program,
-      body: [
+    expect(ast.toPlainObject()).toMatchObject({
+      "type": "Program",
+      "body": [
         {
-          type: NodeTypes.VariableStatement,
-          value: new Token(TokenTypes.LetKeyword, 'let'),
-          body: [
+          "type": "VariableStatement",
+          "value": {
+            "type": "LetKeyword",
+            "value": "let"
+          },
+          "body": [
             {
-              type: NodeTypes.VariableDeclaration,
-              name: 'a',
+              "type": "VariableDeclaration",
+              "name": "a"
             },
             {
-              type: NodeTypes.VariableDeclaration,
-              name: 'b',
-              init: {
-                type: NodeTypes.Expression,
-                operator: new Token(TokenTypes.AdditiveOperator, '+'),
-                left: {
-                  type: NodeTypes.NumericLiteral,
-                  value: 3,
+              "type": "VariableDeclaration",
+              "name": "b",
+              "init": {
+                "type": "Expression",
+                "operator": {
+                  "type": "AdditiveOperator",
+                  "value": "+"
                 },
-                right: {
-                  type: NodeTypes.NumericLiteral,
-                  value: 3,
+                "left": {
+                  "type": "NumericLiteral",
+                  "value": 3
                 },
-              },
+                "right": {
+                  "type": "NumericLiteral",
+                  "value": 3
+                }
+              }
             }
-          ],
+          ]
         }
-      ],
+      ]
     });
+
   });
 
   it('channing variable test', () => {
@@ -132,7 +142,7 @@ describe('variable', () => {
               }
             }
           ]
-        }
+        },
       ],
     });
   });

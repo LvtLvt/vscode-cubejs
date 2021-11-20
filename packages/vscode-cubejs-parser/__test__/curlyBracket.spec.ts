@@ -1,18 +1,28 @@
-import {AstNode, NodeTypes, Parser} from "../src/Parser";
+import {Parser} from "../src/Parser";
+import {AstNode, NodeTypes} from "../src/Node";
+import {prettyLog} from "../src/utils";
 
 describe('curlyBracket', () => {
   it('simple curlyBracket', () => {
     const parser = new Parser();
-    const ast = parser.parse('/**hello world*/   {"   abc";}');
+    const ast = parser.parse(`
+    /**hello world*/   {"   abc";}
+    
+    `);
 
-    expect(ast).toStrictEqual(new AstNode({
-      type: NodeTypes.Program,
-      body: [
-        new AstNode({
-          type: NodeTypes.BlockStatement,
-          body: [new AstNode({type: NodeTypes.StringLiteral, value: "   abc"})]
-        })
-      ],
-    }));
+    expect(ast.toPlainObject()).toMatchObject({
+      "type": "Program",
+      "body": [
+        {
+          "type": "BlockStatement",
+          "body": [
+            {
+              "type": "StringLiteral",
+              "value": "   abc"
+            }
+          ]
+        },
+      ]
+    });
   });
 });

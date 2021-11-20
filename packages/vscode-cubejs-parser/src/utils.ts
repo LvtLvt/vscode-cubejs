@@ -1,15 +1,13 @@
-// @ts-nocheck
-
 export function prettyLog(obj: {}) {
   console.log(JSON.stringify(obj, null, 2));
 }
 
-export function toPlainObject(obj) {
-  const ret = {};
+export function toPlainObject(obj: Record<string, any>) {
+  const ret: Record<string, any> = {};
 
   for (const key in obj) {
 
-    function getValueImpl(value) {
+    function getValueImpl(value: any) {
 
       if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
