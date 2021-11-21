@@ -4,10 +4,8 @@ export function prettyLog(obj: {}) {
 
 export function toPlainObject(obj: Record<string, any>) {
   const ret: Record<string, any> = {};
-
-  for (const key in obj) {
-
-    function getValueImpl(value: any) {
+  
+  function getValueImpl(value: any) {
 
       if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
@@ -18,8 +16,9 @@ export function toPlainObject(obj: Record<string, any>) {
       }
 
       return value;
-    }
-
+  }
+  
+  for (const key in obj) {
     const value = getValueImpl(obj[key]);
     if (value !== undefined && value !== null) {
       ret[key] = value;
