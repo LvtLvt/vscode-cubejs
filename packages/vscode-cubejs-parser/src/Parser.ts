@@ -12,7 +12,7 @@ import {
   UnaryExpressionNode,
   VariableNode
 } from "./Node";
-import {Cube} from "./Cube";
+import {Cube} from "../../vscode-cubejs-core/src/Cube";
 
 export class Parser {
   private _content = "";
@@ -373,3 +373,37 @@ export class Parser {
       token.type === TokenTypes.ComplexAssignmentOperator;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

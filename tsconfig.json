@@ -28,7 +28,13 @@
 	},
 	"references": [
 		{
-			"path": "packages/vscode-cubejs-parser"
+			"path": "packages/vscode-cubejs-parser",
+		},
+		{
+			"path": "packages/vscode-cubejs-core",
+		},
+		{
+			"path": "packages/vscode-cubejs-language-server",
 		}
 	]
 }
