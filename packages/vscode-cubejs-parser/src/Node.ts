@@ -92,7 +92,7 @@ export class FunctionDeclarationNode extends AstNode {
   }
 }
 
-export class FunctionCallExpresssionNode extends AstNode {
+export class FunctionCallExpressionNode extends AstNode {
   constructor(public name: string, public params?: AstNode[]) {
     super({type: NodeTypes.FunctionCallExpression});
   }

@@ -4,7 +4,7 @@ import {SyntaxError} from './SyntaxError';
 import {
   AstNode,
   ExpressionNode,
-  FunctionCallExpresssionNode,
+  FunctionCallExpressionNode,
   FunctionDeclarationNode,
   NodeTypes,
   ObjectDestructuringPropertyDeclarationNode,
@@ -12,7 +12,7 @@ import {
   UnaryExpressionNode,
   VariableNode
 } from "./Node";
-import {Cube} from "../../vscode-cubejs-core/src/Cube";
+import {Cube} from "@vscode-cubejs/core";
 
 export class Parser {
   private _content = "";
@@ -327,7 +327,7 @@ export class Parser {
       this._eat(TokenTypes.RoundBracketOpen);
       const params = this.FunctionParameterList(this.ParameterDeclarationForCall.bind(this));
       this._eat(TokenTypes.RoundBracketClose);
-      return new FunctionCallExpresssionNode(identifier.value, params);
+      return new FunctionCallExpressionNode(identifier.value, params);
     }
 
     return identifier;
@@ -373,37 +373,3 @@ export class Parser {
       token.type === TokenTypes.ComplexAssignmentOperator;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

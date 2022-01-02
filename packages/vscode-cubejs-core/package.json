@@ -1,17 +1,17 @@
 {
   "name": "@vscode-cubejs/core",
   "version": "1.0.0",
-  "main": "./lib/index.js",
+  "main": "./lib/src/index.js",
   "license": "MIT",
   "dependencies": {
     "tslint": "^6.1.3",
     "typescript": "^4.4.4"
   },
   "files": [
-    "./bin/*",
-    "./lib/*"
+    "./bin/**",
+    "./lib/**"
   ],
-  "typings": "./lib/index.d.ts",
+  "typings": "./lib/src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "lint": "tslint -c tslint.json src/**/*.ts",

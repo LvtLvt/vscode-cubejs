@@ -1,0 +1,36 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"lib": [
+			"es2015"
+		],
+		"rootDir": "src",
+		"outDir": "lib",
+		"strict": true,
+		"alwaysStrict": true,
+		"strictFunctionTypes": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"downlevelIteration": true,
+		"declaration": true,
+		"pretty": true,
+		"baseUrl": ".",
+		"paths": {
+			"@vscode-cubejs/*": [
+				"packages/vscode-cubejs-core/src",
+				"packages/vscode-cubejs-parser/src",
+			]
+		}
+	},
+}
