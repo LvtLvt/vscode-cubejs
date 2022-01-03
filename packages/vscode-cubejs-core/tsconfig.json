@@ -5,8 +5,8 @@
 		"__test__"
 	],
 	"compilerOptions": {
-		"rootDir": ".",
-		"outDir": "./lib",
+		"rootDir": "src",
+		"outDir": "lib",
 		"baseUrl": ".",
 		"noImplicitAny": false
 	}

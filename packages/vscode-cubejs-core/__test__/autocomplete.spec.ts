@@ -1,4 +1,4 @@
-import {Trie} from "../src/Trie";
+import {Trie} from "../src";
 
 describe('Cube autocomplete', () => {
   it('should return value which is inserted correctly', function () {

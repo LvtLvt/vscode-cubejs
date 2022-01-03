@@ -17,7 +17,7 @@ import {Cube} from "@vscode-cubejs/core";
 export class Parser {
   private _content = "";
   private _lookahead: Token | null = null;
-  private cubes: Record<string, Cube> = {};
+  private cubes: Map<string, Cube> = new Map<string, Cube>();
   private readonly _tokenizer = new Tokenizer();
 
   parse(content: string) {

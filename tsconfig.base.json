@@ -6,8 +6,6 @@
 		"lib": [
 			"es2015"
 		],
-		"rootDir": "src",
-		"outDir": "lib",
 		"strict": true,
 		"alwaysStrict": true,
 		"strictFunctionTypes": true,
@@ -30,6 +28,7 @@
 			"@vscode-cubejs/*": [
 				"packages/vscode-cubejs-core/src",
 				"packages/vscode-cubejs-parser/src",
+				"packages/vscode-cubejs-language-server/src"
 			]
 		}
 	},
