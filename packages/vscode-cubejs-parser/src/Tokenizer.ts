@@ -81,7 +81,12 @@ const Spec: Array<[RegExp, TokenTypes]> = [
   [/^'[^']*'/, TokenTypes.String],
 ]
 
+export class Position {
+  constructor(index: number) { }
+}
+
 export class Token {
+
   constructor(
     public readonly type: TokenTypes,
     public readonly value: string
@@ -90,16 +95,20 @@ export class Token {
 }
 
 export class Tokenizer {
-  private _cursor = 0;
+  public cursor = 0;
+  public get currentPosition(): Position {
+    return new Position(this.cursor);
+  }
   private _string = "";
+
 
   init(string: string) {
     this._string = string;
-    this._cursor = 0;
+    this.cursor = 0;
   }
 
   hasMoreTokens(): boolean {
-    return this._cursor < this._string.length;
+    return this.cursor < this._string.length;
   }
 
   getNextToken(): Token | null {
@@ -107,7 +116,7 @@ export class Tokenizer {
       return null;
     }
 
-    const content = this._string.slice(this._cursor);
+    const content = this._string.slice(this.cursor);
 
     for (const [regex, tokenType] of Spec) {
       const tokenValue = this._match(regex, content);
@@ -127,7 +136,7 @@ export class Tokenizer {
   }
 
   isEOF(): Boolean {
-    return this._string.length === this._cursor;
+    return this._string.length === this.cursor;
   }
 
   private _match(regex: RegExp, content: string): string | null {
@@ -136,7 +145,7 @@ export class Tokenizer {
       return null;
     }
 
-    this._cursor += matched[0].length
+    this.cursor += matched[0].length
     return matched[0];
   }
 }

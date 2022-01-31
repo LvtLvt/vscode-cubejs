@@ -1,4 +1,4 @@
-import {Token, Tokenizer, TokenTypes} from './Tokenizer';
+import {Position, Token, Tokenizer, TokenTypes} from './Tokenizer';
 import * as assert from "assert";
 import {SyntaxError} from './SyntaxError';
 import {
@@ -13,12 +13,14 @@ import {
   VariableNode
 } from "./Node";
 import {Cube} from "@vscode-cubejs/core";
+import * as os from "os";
 
 export class Parser {
   private _content = "";
   private _lookahead: Token | null = null;
   private cubes: Map<string, Cube> = new Map<string, Cube>();
   private readonly _tokenizer = new Tokenizer();
+  private errorList: SyntaxError[] = [];
 
   parse(content: string) {
     this._content = content;
@@ -28,22 +30,6 @@ export class Parser {
     assert(this._lookahead);
 
     return this.Program();
-  }
-
-  private _eat(tokenType: TokenTypes): Token {
-    const token = this._lookahead;
-
-    if (!token) {
-      throw new SyntaxError(`Unexpected end of input, but expected: ${tokenType}`);
-    }
-
-    if (token.type !== tokenType) {
-      throw new SyntaxError(`Unexpected token: "${token.value}", expected: ${tokenType}`);
-    }
-
-    this._lookahead = this._tokenizer.getNextToken();
-
-    return token;
   }
 
   Program(): AstNode {
@@ -71,9 +57,11 @@ export class Parser {
     switch (this._lookahead?.type) {
       case TokenTypes.Semicolon: return this.EmptyStatement();
       case TokenTypes.CurlyBracketOpen: return this.BlockStatement();
+      // decl [START]
       case TokenTypes.LetKeyword:
       case TokenTypes.VarKeyword:
       case TokenTypes.ConstKeyword: return this.VariableStatement();
+      // decl [END]
       case TokenTypes.ReturnKeyword: return this.ReturnStatement();
       case TokenTypes.FunctionKeyword: return this.FunctionStatement();
       default: return this.ExpressionStatement();
@@ -204,11 +192,6 @@ export class Parser {
     this._eat(TokenTypes.RoundBracketOpen);
     let params = this.FunctionParameterList();
     this._eat(TokenTypes.RoundBracketClose);
-
-    if (this._lookahead?.type !== TokenTypes.CurlyBracketOpen) {
-      // body is required
-      throw new SyntaxError(`FunctionStatement unexpected "${this._lookahead?.value}" but "{" was expected`);
-    }
 
     const body = this.BlockStatement().body || [];
 
@@ -354,7 +337,7 @@ export class Parser {
       case TokenTypes.Number: return this.NumericLiteral();
       case TokenTypes.String: return this.StringLiteral();
 
-      default: throw new SyntaxError(`Literal: unexpected literal production tokenType: [${this._lookahead?.type}] tokenValue: [${this._lookahead?.value}]`);
+      default: throw new SyntaxError(this._tokenizer.currentPosition, `Literal: unexpected literal production tokenType: [${this._lookahead?.type}] tokenValue: [${this._lookahead?.value}]`);
     }
   }
 
@@ -372,4 +355,29 @@ export class Parser {
     return token.type === TokenTypes.SimpleAssignmentOperator ||
       token.type === TokenTypes.ComplexAssignmentOperator;
   }
+
+  private _eat(tokenType: TokenTypes): Token {
+    const token = this._lookahead;
+
+    if (!token) {
+      throw new SyntaxError(this._tokenizer.currentPosition, `Unexpected end of input, but expected: ${tokenType}`);
+    }
+
+    /**
+     * TODO: make progress
+     */
+
+    if (token.type !== tokenType) {
+      this.errorList.push(new SyntaxError(this._tokenizer.currentPosition, `Unexpected token: "${token.value}", expected: ${tokenType}`));
+    }
+
+    this._lookahead = this._tokenizer.getNextToken();
+
+    return token;
+  }
+
 }
+
+// assignment error --> infer type
+// declaration error -->
+// function close error -->
