@@ -1,5 +1,4 @@
 import {Parser} from "../../src/Parser";
-import {prettyLog, toPlainObject} from "../../src/utils";
 
 describe('function', () => {
   const parser = new Parser();
@@ -177,7 +176,6 @@ describe('function', () => {
     console.log(`${parser.errorList[0]}`);
   });
 
-
   it('function declaration with wrong parameters', () => {
     const ast = parser.parse(
       `
@@ -188,8 +186,55 @@ describe('function', () => {
         }
       `);
 
-    prettyLog(ast.toPlainObject());
-    console.log(parser.errorList[0] + '');
+    expect(ast.toPlainObject()).toMatchObject({
+      "type": "Program",
+      "body": [
+        {
+          "type": "FunctionDeclaration",
+          "body": [
+            {
+              "type": "InvalidNode"
+            }
+          ],
+          "name": "a",
+          "params": [
+            {
+              "type": "ObjectDeclaration",
+              "body": [
+                {
+                  "type": "ObjectPropertyDeclaration",
+                  "name": "b",
+                  "init": {
+                    "type": "FunctionDeclaration",
+                    "body": [
+                      {
+                        "type": "VariableStatement",
+                        "value": {
+                          "type": "ConstKeyword",
+                          "value": "const"
+                        },
+                        "body": [
+                          {
+                            "type": "VariableDeclaration",
+                            "name": "a",
+                            "init": {
+                              "type": "NumericLiteral",
+                              "value": 123
+                            }
+                          }
+                        ]
+                      }
+                    ],
+                    "name": "b",
+                    "params": []
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
   });
 
 });
