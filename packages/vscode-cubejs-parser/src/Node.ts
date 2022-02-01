@@ -20,6 +20,8 @@ export enum NodeTypes {
   VariableDeclaration = 'VariableDeclaration',
   FunctionDeclaration = 'FunctionDeclaration',
   FunctionCallExpression = 'FunctionCallExpression',
+
+  InvalidNode = "InvalidNode",
 }
 
 export class AstNode {

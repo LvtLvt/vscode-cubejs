@@ -127,7 +127,7 @@ describe('function', () => {
     });
   });
 
-  it('function declaration with syntax error', () => {
+  it('function declaration without end of body', () => {
     const ast = parser.parse(
       `
         function a() {
@@ -176,4 +176,20 @@ describe('function', () => {
     expect(parser.errorList.length).toEqual(1);
     console.log(`${parser.errorList[0]}`);
   });
+
+
+  it('function declaration with wrong parameters', () => {
+    const ast = parser.parse(
+      `
+        function a( {
+          function b() {
+            const a = 123;
+          }
+        }
+      `);
+
+    prettyLog(ast.toPlainObject());
+    console.log(parser.errorList[0] + '');
+  });
+
 });

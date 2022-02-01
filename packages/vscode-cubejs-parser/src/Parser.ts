@@ -1,4 +1,4 @@
-import {Position, Token, Tokenizer, TokenTypes} from './Tokenizer';
+import {Token, Tokenizer, TokenTypes} from './Tokenizer';
 import * as assert from "assert";
 import {SyntaxError} from '@vscode-cubejs/core/src/SyntaxError';
 import {
@@ -12,7 +12,7 @@ import {
   UnaryExpressionNode,
   VariableNode
 } from "./Node";
-import {Cube} from "@vscode-cubejs/core";
+import {Cube} from "@vscode-cubejs/core/lib";
 
 export class Parser {
   private _content = "";
@@ -201,6 +201,11 @@ export class Parser {
     let params: AstNode[] = [];
     while(this._lookahead?.type !== TokenTypes.RoundBracketClose && !this._tokenizer.isEOF()) {
       const parameter = declarationFn();
+
+      if (parameter.type === NodeTypes.InvalidNode) {
+        break;
+      }
+
       if (this._lookahead?.type === TokenTypes.Comma) {
         this._eat(TokenTypes.Comma);
       }
@@ -213,7 +218,11 @@ export class Parser {
   private ParameterDeclaration(): AstNode {
     switch (this._lookahead?.type) {
       case TokenTypes.Identifier: return this.Identifier();
-      default: return this.ObjectDeclaration(true);
+      case TokenTypes.Spread: return this.ObjectDeclaration(true);
+      case TokenTypes.CurlyBracketOpen: return this.ObjectDeclaration(false);
+      default: {
+        return new AstNode({type: NodeTypes.InvalidNode, value: this._lookahead?.value});
+      }
     }
   }
 
@@ -230,7 +239,11 @@ export class Parser {
       if (this.eatIfLineBreak()) {
         continue;
       }
-      object.body.push(isDestructuring ? this.ObjectDestructuringPropertyDeclaration() : this.ObjectPropertyDeclaration());
+      const declaration = isDestructuring ? this.ObjectDestructuringPropertyDeclaration() : this.ObjectPropertyDeclaration();
+      if (declaration.type === NodeTypes.InvalidNode) {
+        continue;
+      }
+      object.body.push(declaration);
     }
 
     this._eat(TokenTypes.CurlyBracketClose);
@@ -264,7 +277,12 @@ export class Parser {
       }
       default: {
         const identifier = this.ObjectPropertyIdentifier();
-        if (this._lookahead?.type === TokenTypes.Colon) {
+        if (identifier.type === NodeTypes.InvalidNode) {
+          property = identifier;
+        } else if (identifier.type === NodeTypes.FunctionDeclaration) {
+          const fnDecl = identifier as FunctionDeclarationNode;
+          property = new ObjectPropertyDeclarationNode({name: fnDecl.name, init: fnDecl});
+        } else if (this._lookahead?.type === TokenTypes.Colon) {
           this._eat(TokenTypes.Colon);
           property = new ObjectPropertyDeclarationNode({name: identifier.value, init: this.AdditiveExpression()});
         } else {
@@ -287,6 +305,8 @@ export class Parser {
       this._eat(TokenTypes.SquareBracketOpen);
       identifier = this.Identifier();
       this._eat(TokenTypes.SquareBracketClose);
+    } else if (this._lookahead?.type === TokenTypes.FunctionKeyword) {
+      identifier = this.FunctionStatement();
     } else {
       identifier = this.Identifier();
     }
@@ -317,6 +337,12 @@ export class Parser {
 
   private Identifier() {
     const token = this._eat(TokenTypes.Identifier);
+
+    // for error recovery
+    if (token.type !== TokenTypes.Identifier) {
+      return new AstNode({type: NodeTypes.InvalidNode, value: token.value});
+    }
+
     return new AstNode({
       type: NodeTypes.Identifier,
       value: token.value,
@@ -336,7 +362,10 @@ export class Parser {
       case TokenTypes.Number: return this.NumericLiteral();
       case TokenTypes.String: return this.StringLiteral();
 
-      default: throw new SyntaxError(this._tokenizer.currentPosition, `Literal: unexpected literal production tokenType: [${this._lookahead?.type}] tokenValue: [${this._lookahead?.value}]`);
+      default: {
+        this.errorList.push(new SyntaxError(this._tokenizer.currentPosition, `Literal: unexpected literal production tokenType: [${this._lookahead?.type}] tokenValue: [${this._lookahead?.value}]`));
+        return new AstNode({type: NodeTypes.InvalidNode,value: this._lookahead?.value});
+      }
     }
   }
 
