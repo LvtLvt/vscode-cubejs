@@ -34,6 +34,8 @@ export enum TokenTypes {
   AdditiveOperator = 'AdditiveOperator',
   Comma = 'Comma',
   Dot = '.',
+
+  Invalid = 'Invalid', // for error recovery
 }
 
 const Spec: Array<[RegExp, TokenTypes]> = [
@@ -82,7 +84,7 @@ const Spec: Array<[RegExp, TokenTypes]> = [
 ]
 
 export class Position {
-  constructor(index: number) { }
+  constructor(public index: number) { }
 }
 
 export class Token {
@@ -90,7 +92,10 @@ export class Token {
   constructor(
     public readonly type: TokenTypes,
     public readonly value: string
-  ) {
+  ) { }
+
+  public static NewErrorToken(value: string = TokenTypes.Invalid.toString()) {
+    return new Token(TokenTypes.Invalid, value);
   }
 }
 
@@ -136,7 +141,7 @@ export class Tokenizer {
   }
 
   isEOF(): Boolean {
-    return this._string.length === this.cursor;
+    return this._string.length <= this.cursor;
   }
 
   private _match(regex: RegExp, content: string): string | null {

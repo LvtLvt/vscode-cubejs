@@ -1,6 +1,6 @@
 import {Position, Token, Tokenizer, TokenTypes} from './Tokenizer';
 import * as assert from "assert";
-import {SyntaxError} from './SyntaxError';
+import {SyntaxError} from '@vscode-cubejs/core/src/SyntaxError';
 import {
   AstNode,
   ExpressionNode,
@@ -13,7 +13,6 @@ import {
   VariableNode
 } from "./Node";
 import {Cube} from "@vscode-cubejs/core";
-import * as os from "os";
 
 export class Parser {
   private _content = "";
@@ -48,7 +47,7 @@ export class Parser {
       }
 
       statementList.push(this.Statement());
-    } while (this._lookahead && this._lookahead.type !== skipLookAheadType);
+    } while (this._lookahead && this._lookahead.type !== skipLookAheadType && !this._tokenizer.isEOF());
 
     return statementList;
   }
@@ -102,7 +101,7 @@ export class Parser {
         continue;
       }
       variables.push(this.VariableExpression());
-    } while (this._lookahead?.type === TokenTypes.Comma && this._eat(TokenTypes.Comma))
+    } while (this._lookahead?.type === TokenTypes.Comma && this._eat(TokenTypes.Comma) && !this._tokenizer.isEOF())
 
     this.eatEndOfExpression();
 
@@ -154,7 +153,7 @@ export class Parser {
   private AdditiveExpression(): AstNode {
     let left: AstNode = this.PrimaryExpression();
 
-    while (this._lookahead?.type === TokenTypes.AdditiveOperator) {
+    while (this._lookahead?.type === TokenTypes.AdditiveOperator && !this._tokenizer.isEOF()) {
       const operator = this._eat(TokenTypes.AdditiveOperator);
       const right = this.PrimaryExpression();
 
@@ -200,7 +199,7 @@ export class Parser {
 
   private FunctionParameterList(declarationFn = this.ParameterDeclaration.bind(this)): AstNode[] {
     let params: AstNode[] = [];
-    while(this._lookahead?.type !== TokenTypes.RoundBracketClose) {
+    while(this._lookahead?.type !== TokenTypes.RoundBracketClose && !this._tokenizer.isEOF()) {
       const parameter = declarationFn();
       if (this._lookahead?.type === TokenTypes.Comma) {
         this._eat(TokenTypes.Comma);
@@ -227,7 +226,7 @@ export class Parser {
     object.body = [];
     this._eat(TokenTypes.CurlyBracketOpen);
 
-    while (this._lookahead?.type !== TokenTypes.CurlyBracketClose) {
+    while (this._lookahead?.type !== TokenTypes.CurlyBracketClose && !this._tokenizer.isEOF()) {
       if (this.eatIfLineBreak()) {
         continue;
       }
@@ -360,7 +359,8 @@ export class Parser {
     const token = this._lookahead;
 
     if (!token) {
-      throw new SyntaxError(this._tokenizer.currentPosition, `Unexpected end of input, but expected: ${tokenType}`);
+      this.errorList.push(new SyntaxError(this._tokenizer.currentPosition, `Unexpected end of input, but expected: ${tokenType}`));
+      return Token.NewErrorToken();
     }
 
     if (token.type !== tokenType) {
@@ -373,7 +373,3 @@ export class Parser {
   }
 
 }
-
-// assignment error --> infer type
-// declaration error -->
-// function close error -->

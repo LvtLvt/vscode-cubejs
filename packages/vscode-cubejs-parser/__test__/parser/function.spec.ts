@@ -1,5 +1,5 @@
 import {Parser} from "../../src/Parser";
-import {prettyLog} from "../../src/utils";
+import {prettyLog, toPlainObject} from "../../src/utils";
 
 describe('function', () => {
   const parser = new Parser();
@@ -128,19 +128,52 @@ describe('function', () => {
   });
 
   it('function declaration with syntax error', () => {
-    try {
-      const ast = parser.parse(
-        `
+    const ast = parser.parse(
+      `
         function a() {
         
         function b() {
           const a = 123;
         }
       `);
-      console.log(ast.toPlainObject());
-    } catch (e) {}
 
-    console.log(parser.errorList);
-
+    expect(ast.toPlainObject()).toMatchObject({
+      "type": "Program",
+      "body": [
+        {
+          "type": "FunctionDeclaration",
+          "body": [
+            {
+              "type": "FunctionDeclaration",
+              "body": [
+                {
+                  "type": "VariableStatement",
+                  "value": {
+                    "type": "ConstKeyword",
+                    "value": "const"
+                  },
+                  "body": [
+                    {
+                      "type": "VariableDeclaration",
+                      "name": "a",
+                      "init": {
+                        "type": "NumericLiteral",
+                        "value": 123
+                      }
+                    }
+                  ]
+                }
+              ],
+              "name": "b",
+              "params": []
+            }
+          ],
+          "name": "a",
+          "params": []
+        }
+      ]
+    });
+    expect(parser.errorList.length).toEqual(1);
+    console.log(`${parser.errorList[0]}`);
   });
 });
