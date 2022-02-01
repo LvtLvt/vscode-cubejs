@@ -20,7 +20,7 @@ export class Parser {
   private _lookahead: Token | null = null;
   private cubes: Map<string, Cube> = new Map<string, Cube>();
   private readonly _tokenizer = new Tokenizer();
-  private errorList: SyntaxError[] = [];
+  public errorList: SyntaxError[] = [];
 
   parse(content: string) {
     this._content = content;
@@ -362,10 +362,6 @@ export class Parser {
     if (!token) {
       throw new SyntaxError(this._tokenizer.currentPosition, `Unexpected end of input, but expected: ${tokenType}`);
     }
-
-    /**
-     * TODO: make progress
-     */
 
     if (token.type !== tokenType) {
       this.errorList.push(new SyntaxError(this._tokenizer.currentPosition, `Unexpected token: "${token.value}", expected: ${tokenType}`));

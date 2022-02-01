@@ -126,4 +126,21 @@ describe('function', () => {
       ]
     });
   });
+
+  it('function declaration with syntax error', () => {
+    try {
+      const ast = parser.parse(
+        `
+        function a() {
+        
+        function b() {
+          const a = 123;
+        }
+      `);
+      console.log(ast.toPlainObject());
+    } catch (e) {}
+
+    console.log(parser.errorList);
+
+  });
 });
