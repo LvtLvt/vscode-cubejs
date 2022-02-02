@@ -10,9 +10,13 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<ExtensionA
   State.workSpaceState = ctx.workspaceState;
 
   const cfg = getCubeConfig();
+
+  // if need a welcome message later, use this
   // if (vscode.window.registerWebviewPanelSerializer) {
   //   vscode.window.registerWebviewPanelSerializer()
   // }
+
+  //
 
   return {
     settings: {
