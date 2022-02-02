@@ -3,6 +3,7 @@ import {CommandInvocation, ExtensionAPI} from "./export";
 import {Uri} from "vscode";
 import State from "./state";
 import {getCubeConfig} from "./config";
+import {startLanguageServer} from "./cubeLanguageServer";
 
 export async function activate(ctx: vscode.ExtensionContext): Promise<ExtensionAPI> {
 
@@ -16,7 +17,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<ExtensionA
   //   vscode.window.registerWebviewPanelSerializer()
   // }
 
-  //
+  await startLanguageServer(ctx, 'activation');
 
   return {
     settings: {
